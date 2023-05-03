@@ -1,0 +1,12 @@
+name: AyearTipsApi
+main: ayeartipsapi.Main
+version: "1.0.0"
+api: [ "1.0.14" ]
+load: POSTWORLD
+author: Mcayear
+description: 用于注册一些玩家经验相关的TipsAPI
+prefix: "AyearTipsApi"
+depend:
+  - LLSELib
+  - Tips
+  - EconomyAPI
