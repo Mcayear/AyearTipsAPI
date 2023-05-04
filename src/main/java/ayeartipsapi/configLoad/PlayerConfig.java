@@ -51,8 +51,14 @@ public class PlayerConfig {
      */
     public static String getUsing(Player p) {
         Config data = getConfig(p);
-        if (data == null) return null;
-        return data.getString("using", null);
+        String title = null;
+        if (data != null) {
+            title = data.getString("using", null);
+        }
+        if (title == null || title == "null") {
+            title = LoadCfg.defaultTitle;
+        }
+        return title;
     }
 
 }

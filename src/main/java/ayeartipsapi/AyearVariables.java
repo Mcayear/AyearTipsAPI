@@ -21,9 +21,6 @@ public class AyearVariables extends BaseVariable {
             ayearString();
         }
     }
-
-    public void getNTitle() {
-    }
     private void ayearString(){
         addStrReplaceString("{player_exp_level}", String.valueOf(player.getExperienceLevel()));
         int lv = (player.getExperienceLevel() + 1);

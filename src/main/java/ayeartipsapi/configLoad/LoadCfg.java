@@ -11,6 +11,7 @@ import java.io.File;
  */
 public class LoadCfg {
     public static Config cfgData;
+    public static String defaultTitle;
     public static void loadCfgData(){
         if(!new File(Main.getPlugin().getDataFolder(), "config.yml").exists()) {
             Main.getPlugin().saveResource("config.yml");
@@ -18,6 +19,7 @@ public class LoadCfg {
         } else {
             cfgData = new Config(new File(Main.getPlugin().getDataFolder(), "config.yml"), Config.YAML);
         }
+        defaultTitle = cfgData.getSection("title").getString("default");
         Main.getPlugin().getLogger().info(TextFormat.GREEN+"config.yml加载完成!");
     }
 }

@@ -1,5 +1,6 @@
 package ayeartipsapi.window;
 
+import ayeartipsapi.Main;
 import ayeartipsapi.configLoad.LoadLanguage;
 import ayeartipsapi.configLoad.LoadShop;
 import ayeartipsapi.configLoad.PlayerConfig;
@@ -30,11 +31,14 @@ import static ayeartipsapi.utils.Util.Date2YMD;
 
 public class TitleWindow {
 
+    public static FormWindowSimple sendNTitleShopWin(Player p) {
+        return sendNTitleShopWin(p, false);
+    }
     /**
      * 发送称号商城的主菜单
      * @param p 发送者
      */
-    public static FormWindowSimple sendNTitleShopWin(Player p){
+    public static FormWindowSimple sendNTitleShopWin(Player p, boolean needBack){
         FormWindowSimple wd = new FormWindowSimple(LoadLanguage.titleShopMenu, LoadLanguage.textShopMenu);
 
         Config shopData = LoadShop.ShopData;
@@ -54,6 +58,9 @@ public class TitleWindow {
 
         wd.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
             if (wd.wasClosed()) {
+                if (needBack) {
+                    p.showFormWindow(sendNTitleMyProfileWin(p));
+                }
                 return;
             }
 
@@ -68,7 +75,7 @@ public class TitleWindow {
      * @return 界面
      */
     public static FormWindowCustom sendNTitleBuyWin(Player player, ConfigSection titleConfig, String title) {
-        FormWindowCustom win = new FormWindowCustom(titleConfig.getString("title") + "§r - 购买页面");
+        FormWindowCustom win = new FormWindowCustom(titleConfig.getString("title") + "§r - "+LoadLanguage.titleBuyPage);
 
         Map<String, Object> attr = titleConfig.getSection("attr").getAll();
         StringBuilder str = new StringBuilder();
@@ -82,7 +89,7 @@ public class TitleWindow {
 
         win.addElement(new ElementLabel(
                 "称号: " + title +
-                        "\n§r售价: " + (titleConfig.getDouble("sell") < 0 ? "§7非卖品" : titleConfig.getDouble("sell") + " /" + titleConfig.getInt("day") + "天") +
+                        "\n§r售价: " + (titleConfig.getDouble("sell") < 0 ? "§7"+LoadLanguage.noSale : titleConfig.getDouble("sell") + " /" + titleConfig.getInt("day") + "天") +
                         "\n§r属性: " + str
         ));
 
@@ -93,12 +100,12 @@ public class TitleWindow {
 
         if (titleConfig.getBoolean("noOverlap") && isUsableTitle(player, title)) {
             isOverlap = true;
-            reason.add("不可重叠");
+            reason.add(LoadLanguage.notStackable);
         }
 
         if (titleConfig.getDouble("sell") < 0) {
             isNotSell = true;
-            reason.add("非卖品");
+            reason.add(LoadLanguage.noSale);
         }
 
         if (isNotSell || isOverlap) {
@@ -122,12 +129,12 @@ public class TitleWindow {
             double haveMoney = EconomyAPI.getInstance().myMoney(player);
 
             if(day == 0) {
-                sendNTitleShopWin(player);
+                player.showFormWindow(sendNTitleShopWin(player));
                 return;
             }
             if(haveMoney < needMoney) {
                 player.sendMessage("[NTitle] 余额不足: §c"+haveMoney+"§r/"+needMoney);
-                sendNTitleShopWin(player);
+                player.showFormWindow(sendNTitleShopWin(player));
                 return;
             }
             //Start - 处理玩家数据
@@ -155,14 +162,14 @@ public class TitleWindow {
                 data.set("using", title);
             }
             data.save();
-            sendNTitleShopWin(player);
+            player.showFormWindow(sendNTitleShopWin(player));
 
         }));
         return win;
     }
 
     /**
-     * 发送称号商城的主菜单
+     * 发送我的称号 页面
      * @param p 发送者
      */
     public static FormWindowSimple sendNTitleMyProfileWin(Player p){
@@ -176,7 +183,7 @@ public class TitleWindow {
             long time = playerConfig.getLong(key);
             wd.addButton(new ElementButton(key+"\n§7有效期: "+(time > -1 ? Date2YMD(time) : "永久")));
         }
-        wd.addButton(new ElementButton(LoadCfg.cfgData.getString("default")+"\n§7有效期: 永久(默认称号)"));
+        wd.addButton(new ElementButton(LoadCfg.defaultTitle+"\n§7有效期: 永久(默认称号)"));
         wd.addButton(new ElementButton("§l获取更多称号.."));
 
 
@@ -196,10 +203,10 @@ public class TitleWindow {
                 p.sendMessage("[NTitle] 成功佩戴称号 "+keys.get(butId));
                 cfg.save();
             } else if (index < 0) {
-                sendNTitleShopWin(p);
+                p.showFormWindow(sendNTitleShopWin(p, true));
             } else {
                 cfg.set("using", null);
-                p.sendMessage("[NTitle] 成功佩戴称号 "+LoadCfg.cfgData.getString("default"));
+                p.sendMessage("[NTitle] 成功佩戴称号 "+LoadCfg.defaultTitle);
                 cfg.save();
             }
         }));
